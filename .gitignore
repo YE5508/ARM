@@ -5,3 +5,8 @@ MDK-ARM/DebugConfig/
 
 # 每个用户自己的 Keil 界面布局文件
 MDK-ARM/*.uvguix.*
+
+# vscode配置文件
+.vscode/
+
+

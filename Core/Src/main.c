@@ -41,7 +41,7 @@
 #include "bsp_solenoid.h"
 #include "app_config.h"
 #include "bluetooth.h"
-
+#include "seize_sky.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -110,7 +110,9 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  ZdriveInit();
+  UnitreeMotor_Init();
+  Sky_Init();
   /* USER CODE END Init */
 
   /* Configure the system clock */

@@ -73,6 +73,7 @@ void MX_FDCAN1_Init(void)
   }
   /* USER CODE BEGIN FDCAN1_Init 2 */
 
+
   /* USER CODE END FDCAN1_Init 2 */
 
 }
@@ -120,7 +121,6 @@ void MX_FDCAN2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN2_Init 2 */
-
   /* USER CODE END FDCAN2_Init 2 */
 
 }

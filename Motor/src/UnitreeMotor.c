@@ -103,7 +103,7 @@ void UnitreeMotor_Init(void)
         Unitree_motors[i].cmd.id = (uint16_t)i;
         Unitree_motors[i].data.id = (uint8_t)i;
         Unitree_motors[i].enable = false;
-        Unitree_motors[i].set_zero = false;
+        Unitree_motors[i].set_zero = true;
         Unitree_motors[i].zero_offset = 0.0f;
         Unitree_motors[i].begin = true;
     }

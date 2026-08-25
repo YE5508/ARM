@@ -20,6 +20,7 @@
                 "e:\\RC_EC\\Stm32\\Template\\WHU_STM32H7_Template\\Config",
                 "e:\\RC_EC\\Stm32\\Template\\WHU_STM32H7_Template\\Communication\\Bluetooth",
                 "e:\\RC_EC\\Stm32\\Template\\WHU_STM32H7_Template\\Communication\\VOFA",
+                "e:\\RC_EC\\Stm32\\Template\\WHU_STM32H7_Template\\User\\inc",
                 "E:\\app\\Keil\\ARM\\ARMCLANG\\include",
                 "E:\\app\\Keil\\ARM\\ARMCLANG\\include\\arm_linux",
                 "E:\\app\\Keil\\ARM\\ARMCLANG\\include\\arm_linux_compat",
@@ -34,6 +35,7 @@
                 "e:\\RC_EC\\Stm32\\Template\\WHU_STM32H7_Template\\BSP\\src",
                 "e:\\RC_EC\\Stm32\\Template\\WHU_STM32H7_Template\\Motor\\src",
                 "e:\\RC_EC\\Stm32\\Template\\WHU_STM32H7_Template\\Algorithm\\src",
+                "e:\\RC_EC\\Stm32\\Template\\WHU_STM32H7_Template\\User\\src",
                 "${default}"
             ],
             "defines": [

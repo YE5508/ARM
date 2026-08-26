@@ -113,6 +113,7 @@ int main(void)
   ZdriveInit();
   UnitreeMotor_Init();
   Sky_Init();
+  Jaw_Init();
   /* USER CODE END Init */
 
   /* Configure the system clock */

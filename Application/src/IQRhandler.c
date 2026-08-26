@@ -59,6 +59,8 @@ void TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 #endif
         /*天空块状态机*/
         Sky_Func();
+        /*夹爪开闭*/
+        Jaw_Func();
 #if USE_UNITREE
         UnitreeMotor_Func();
 #endif
@@ -96,6 +98,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
         if (hfdcan == &hfdcan1)
         {
             Sky_Receive(Rxheader, Rx_data);
+            Jaw_Receive(Rxheader, Rx_data);
 #if USE_ZMDR
             ZdriveReceive(Rxheader, Rx_data, 0U);
 #endif

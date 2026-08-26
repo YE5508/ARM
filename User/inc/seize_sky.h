@@ -15,6 +15,7 @@ typedef enum
 
 typedef struct 
 {
+    bool enable;
     UnitreeMotor* JointGo;//关节电机1
     Zdrive* JointAK;//关节电机2
     Sky_Mode_t Sky_Mode;

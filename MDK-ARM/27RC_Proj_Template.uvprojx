@@ -765,6 +765,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\src\seize_sky.c</FilePath>
             </File>
+            <File>
+              <FileName>holding_jaw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\src\holding_jaw.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

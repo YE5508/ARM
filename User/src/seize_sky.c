@@ -15,10 +15,10 @@ SKY_MODE_FDCANID为Sky模式切换的fdCANid，DLC为2，data[0]取值范围为0
 #define JOINTGO_GRAB_POSITION 1
 #define JOINTAK_GRAB_POSITION 1
 
-#define JOINTGO_PUT_POSITION 1
+#define JOINTGO_PUT_POSITION 2
 #define JOINTAK_PUT_POSITION 1
 
-#define JOINTGO_CARRY_POSITION 1
+#define JOINTGO_CARRY_POSITION 3
 #define JOINTAK_CARRY_POSITION 1
 
 
@@ -28,6 +28,10 @@ Sky_t sky;
 
 void Sky_Func(void)
 {
+    if(sky.enable!=true)
+    {
+        return;
+    }
     switch (sky.Sky_Mode)
     {
 
@@ -62,6 +66,8 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
 }
 void Sky_Init(void)
 {
+    sky.enable =false;
+
     sky.JointGo = &Unitree_motors[UnitreeMotor_Use_ID-1];
     sky.JointAK = &Zmotor[ZdriveMotor_Use_ID-1];
     sky.Sky_Mode = Sky_Carry_Mode;

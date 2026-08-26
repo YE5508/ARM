@@ -42,6 +42,7 @@
 #include "app_config.h"
 #include "bluetooth.h"
 #include "seize_sky.h"
+#include "holding_jaw.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -113,7 +114,6 @@ int main(void)
   ZdriveInit();
   UnitreeMotor_Init();
   Sky_Init();
-  Jaw_Init();
   /* USER CODE END Init */
 
   /* Configure the system clock */

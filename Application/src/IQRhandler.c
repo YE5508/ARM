@@ -27,6 +27,8 @@
 #include "vofa.h"
 #include "board_config.h"
 #include "bluetooth.h"
+#include "seize_sky.h"
+#include "holding_jaw.h"
 
 __RAM_D2_ ALIGN_32B uint8_t UART1_RxBuffer[UART_RX_BUFFER_SIZE] = {0};
 __RAM_D2_ ALIGN_32B uint8_t UART3_RxBuffer[UART_RX_BUFFER_SIZE] = {0};

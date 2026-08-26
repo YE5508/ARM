@@ -5,6 +5,7 @@
 #include "UnitreeMotor.h"
 #include "ZDrive.h"
 #include "holding_jaw.h"
+#include "bsp_buzzer.h"
 
 typedef enum 
 {
@@ -19,6 +20,7 @@ typedef struct
     UnitreeMotor* JointGo;//关节电机1
     Zdrive* JointAK;//关节电机2
     Sky_Mode_t Sky_Mode;
+    bool FinishFlag;
     /* data */
 }Sky_t;
 

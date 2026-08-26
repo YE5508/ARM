@@ -1,6 +1,6 @@
 #include "holding_jaw.h"
 
-#define JAW_OPENFDCANID 0x010203E3//DLC=1,Jaw_Open=Rx_Data[0]
+#define JAW_OPENFDCANID 0x01010405//DLC=1,Jaw_Open=Rx_Data[0]
 
 static bool Jaw_Open;
 

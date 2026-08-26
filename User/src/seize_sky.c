@@ -25,16 +25,19 @@ SKY_MODE_FDCANID为Sky模式切换的fdCANid，DLC为2，data[0]取值范围为0
 #define JOINTGO_PUT_POSITION 2
 #define JOINTAK_PUT_POSITION 1
 
-#define JOINTGO_CARRY_POSITION 3
+#define JOINTGO_CARRY_POSITION 10
 #define JOINTAK_CARRY_POSITION 1
 
-#define JOINTGO_FINISH_THRESHOLD 0.01
+#define JOINTGO_FINISH_THRESHOLD 0.5
 #define JOINTAK_FINISH_THRESHOLD 0.01
+
+#define GO_TIME 10000//单位为ms
 
 Sky_t sky;
 
 void Sky_Func(void)
 {
+    static float time;
     if (sky.enable != true)
     {
         return;
@@ -43,24 +46,38 @@ void Sky_Func(void)
     {
 
     case Sky_Grab_Mode:
-        sky.JointGo->cmd.position = JOINTGO_GRAB_POSITION;
-        sky.JointAK->valSetNow.pos_deg = JOINTAK_GRAB_POSITION;
+        if(sky.FinishFlag == 0 )
+        {
+            time=Quintic_Traj(sky.Go_time++,GO_TIME);
+            sky.JointGo->cmd.position = JOINTGO_GRAB_POSITION*time;
+            sky.JointAK->valSetNow.pos_deg = JOINTAK_GRAB_POSITION;
+        }
+
         break;
 
     case Sky_Put_Mode:
-        sky.JointGo->cmd.position = JOINTGO_PUT_POSITION;
-        sky.JointAK->valSetNow.pos_deg = JOINTAK_PUT_POSITION;
+        if(sky.FinishFlag == 0 )
+        {
+            time=Quintic_Traj(sky.Go_time++,GO_TIME);
+            sky.JointGo->cmd.position = JOINTGO_PUT_POSITION*time;
+            sky.JointAK->valSetNow.pos_deg = JOINTAK_PUT_POSITION;
+        }
         break;
 
     case Sky_Carry_Mode:
-        sky.JointGo->cmd.position = JOINTGO_CARRY_POSITION;
-        sky.JointAK->valSetNow.pos_deg = JOINTAK_CARRY_POSITION;
+        if(sky.FinishFlag == 0 )
+        {
+            time=Quintic_Traj(sky.Go_time++,GO_TIME);
+            sky.JointGo->cmd.position = JOINTGO_CARRY_POSITION*time;
+            sky.JointAK->valSetNow.pos_deg = JOINTAK_CARRY_POSITION;
+        }
         break;
     }
-    if (fabs(sky.JointGo->data.position - sky.JointGo->cmd.position) < JOINTGO_FINISH_THRESHOLD &&
+    if (fabs(sky.JointGo->data.position - JOINTGO_CARRY_POSITION) < JOINTGO_FINISH_THRESHOLD &&
         fabs(sky.JointAK->valSetNow.pos_deg - sky.JointAK->valReal.pos_deg) < JOINTAK_FINISH_THRESHOLD)
     {
         sky.FinishFlag = 1;
+        sky.Go_time=0;
     }
 }
 void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
@@ -121,6 +138,7 @@ void Sky_Init(void)
     sky.JointGo = &Unitree_motors[UnitreeMotor_Use_ID - 1];
     sky.JointAK = &Zmotor[ZdriveMotor_Use_ID - 1];
     sky.Sky_Mode = Sky_Carry_Mode;
+    sky.Go_time=0;
     /*Unitree Go Motor初始化*/
     sky.JointGo->begin = true;
     sky.JointGo->enable = true;

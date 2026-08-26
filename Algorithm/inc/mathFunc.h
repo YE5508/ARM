@@ -114,6 +114,7 @@ extern "C"
     int MSG_Byte2Int32(uint8_t *buff, uint8_t i);
     void MSG_Int162Byte(s16 data, uint8_t *buff, uint8_t i);
     void MSG_Int322Byte(int data, uint8_t *buff, uint8_t i);
+    float Quintic_Traj(float time,float total_time);
 
 #ifdef __cplusplus
 }

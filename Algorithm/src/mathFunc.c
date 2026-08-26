@@ -124,3 +124,32 @@ void MSG_Int322Byte(int data, uint8_t *buff, uint8_t i)
     buff[i + 2] = (uint8_t)((u >> 16U) & 0xffU);
     buff[i + 3] = (uint8_t)(u >> 24U);
 }
+
+/*在1KHZ的定时器中断中调用，total_time单位为ms*/
+
+float Quintic_Traj(float time,float total_time)
+{
+    float output=0;
+    float t,t2,t3,t4,t5;
+    if(time<0)
+    {
+        time=0;        
+    }
+
+    else if (time>total_time)
+    {
+        time=total_time;
+    }
+    
+    t=time/total_time;
+    
+    t2=t*t;
+    t3=t2*t;
+    t4=t3*t;
+    t5=t4*t;
+
+
+
+    output=10.0*t3-15.0*t4+6*t5;
+    return output;
+}

@@ -21,6 +21,7 @@ typedef struct
     Zdrive* JointAK;//关节电机2
     Sky_Mode_t Sky_Mode;
     bool FinishFlag;
+    uint32_t Go_time;
     /* data */
 }Sky_t;
 

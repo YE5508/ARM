@@ -6,6 +6,7 @@
 #include "ZDrive.h"
 #include "holding_jaw.h"
 #include "bsp_buzzer.h"
+#include "stm32h7xx.h"
 
 typedef enum 
 {
@@ -22,6 +23,7 @@ typedef struct
     Sky_Mode_t Sky_Mode;
     bool FinishFlag;
     uint32_t Go_time;
+    bool ResetFlag;
     /* data */
 }Sky_t;
 

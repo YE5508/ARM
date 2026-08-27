@@ -35,9 +35,15 @@ SKY_MODE_FDCANID为Sky模式切换的fdCANid，DLC为2，data[0]取值范围为0
 
 Sky_t sky;
 
+
 void Sky_Func(void)
 {
     static float time;
+    if(sky.ResetFlag==true)
+    {
+        __set_FAULTMASK(1); // 关闭所有的中断，确保执行复位时不被中断打断
+        NVIC_SystemReset(); // 系统软件复位，配置好的外设寄存器也一起复位
+    }
     if (sky.enable != true)
     {
         return;
@@ -124,8 +130,7 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
     }
     if (Rxheader.Identifier == SKY_RESET_FDCANID)
     {
-        Sky_Init();
-        BspBuzzer_Alarm(3, 20, 20);
+        sky.ResetFlag=true;
     }
     if (Rxheader.Identifier == SKY_ALARM_FDCANID)
     {
@@ -134,7 +139,7 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
 void Sky_Init(void)
 {
     sky.enable = false;
-
+    sky.ResetFlag=false;
     sky.JointGo = &Unitree_motors[UnitreeMotor_Use_ID - 1];
     sky.JointAK = &Zmotor[ZdriveMotor_Use_ID - 1];
     sky.Sky_Mode = Sky_Carry_Mode;

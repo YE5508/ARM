@@ -4,20 +4,19 @@
 #define ZdriveMotor_Use_ID 1
 /*
 SKY_MODE_FDCANID为Sky模式切换的fdCANid，DLC为2，data[0]取值范围为0-3
-    Sky_Idle_Mode=0,
-    Sky_Grab_Mode=1
-    Sky_Put_Mode=2
-    Sky_Carry_Mode=3
+    Sky_Grab_Mode=0
+    Sky_Put_Mode=1
+    Sky_Carry_Mode=2
 
     */
 
-#define SKY_ENABLE 0x01020401
-#define SKY_GRAB_FDCANID 0x010204AA
-#define SKY_PUT_FDCANID 0x010204BB
-#define SKY_ARM_RESET_FDCANID 0x010204CC
+#define SKY_ENABLE 0x01010401
+#define SKY_GRAB_FDCANID 0x01010402
+#define SKY_PUT_FDCANID 0x01010403
+#define SKY_ARM_RESET_FDCANID 0x01010404
 
-#define SKY_ALARM_FDCANID 0x010204EE
-#define SKY_RESET_FDCANID 0x010204FF
+#define SKY_ALARM_FDCANID 0x010104EE
+#define SKY_RESET_FDCANID 0x010104FF
 
 #define JOINTGO_GRAB_POSITION 1
 #define JOINTAK_GRAB_POSITION 1

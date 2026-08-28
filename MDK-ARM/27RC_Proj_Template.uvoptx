@@ -173,17 +173,22 @@
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Unitree_UART7_RxBuffer,0x0A</ItemText>
+          <ItemText>Unitree_UART7_RxBuffer,0x10</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>sky</ItemText>
+          <ItemText>sky,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
           <ItemText>s_unitree_rx_data</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Sky_Func</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -192,7 +197,7 @@
       <DebugFlag>
         <trace>0</trace>
         <periodic>1</periodic>
-        <aLwin>1</aLwin>
+        <aLwin>0</aLwin>
         <aCover>0</aCover>
         <aSer1>0</aSer1>
         <aSer2>0</aSer2>

@@ -24,6 +24,8 @@ typedef struct
     bool FinishFlag;
     uint32_t Go_time;
     bool ResetFlag;
+    uint8_t buzzer_phase;
+    uint16_t buzzer_timer;
     /* data */
 }Sky_t;
 

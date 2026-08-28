@@ -20,8 +20,8 @@ void Jaw_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
         return;
     }
 
-    if(Rxheader.Identifier == JAW_OPENFDCANID)
+    if(Rxheader.Identifier == JAW_OPENFDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'R')
     {
-        Jaw_Open=Rx_Data[0];
+        Jaw_Open=Rx_Data[1];
     }
 }

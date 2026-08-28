@@ -38,6 +38,7 @@ Sky_t sky;
 void Sky_Func(void)
 {
     static float time;
+    float go_target_position;
     if (sky.buzzer_phase != 0)
     {
         if (--sky.buzzer_timer == 0)
@@ -78,6 +79,7 @@ void Sky_Func(void)
     {
 
     case Sky_Grab_Mode:
+        go_target_position = JOINTGO_GRAB_POSITION;
         if(sky.FinishFlag == 0 )
         {
             time=Quintic_Traj(sky.Go_time++,GO_TIME);
@@ -88,6 +90,7 @@ void Sky_Func(void)
         break;
 
     case Sky_Put_Mode:
+        go_target_position = JOINTGO_PUT_POSITION;
         if(sky.FinishFlag == 0 )
         {
             time=Quintic_Traj(sky.Go_time++,GO_TIME);
@@ -97,6 +100,7 @@ void Sky_Func(void)
         break;
 
     case Sky_Carry_Mode:
+        go_target_position = JOINTGO_CARRY_POSITION;
         if(sky.FinishFlag == 0 )
         {
             time=Quintic_Traj(sky.Go_time++,GO_TIME);
@@ -104,8 +108,10 @@ void Sky_Func(void)
             sky.JointAK->valSetNow.pos_deg = JOINTAK_CARRY_POSITION;
         }
         break;
+    default:
+        return;
     }
-    if (fabs(sky.JointGo->data.position - JOINTGO_CARRY_POSITION) < JOINTGO_FINISH_THRESHOLD &&
+    if (fabs(sky.JointGo->data.position - go_target_position) < JOINTGO_FINISH_THRESHOLD &&
         fabs(sky.JointAK->valSetNow.pos_deg - sky.JointAK->valReal.pos_deg) < JOINTAK_FINISH_THRESHOLD)
     {
         sky.FinishFlag = 1;

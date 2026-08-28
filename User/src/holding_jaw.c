@@ -2,7 +2,7 @@
 
 #define JAW_OPENFDCANID 0x01010405//DLC=1,Jaw_Open=Rx_Data[0]
 
-static bool Jaw_Open;
+bool Jaw_Open;
 
 void Jaw_Init(void)
 {

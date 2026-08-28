@@ -4,6 +4,7 @@
 #include "includes.h"
 #include "bsp_solenoid.h"
 
+extern bool Jaw_Open;
 
 
 void Jaw_Init(void);

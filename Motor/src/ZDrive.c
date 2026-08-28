@@ -110,10 +110,10 @@ void ZdriveInit(void)
         Zmotor[i].valSetNow.pos_deg = 0.0f;
         Zmotor[i].valSetNow.current_A = 0.0f;
         Zmotor[i].valReal.pos_deg = 0.0f;
-        Zmotor[i].param.kpPos = 1.2f;
-        Zmotor[i].param.kdPos = 0.08f;
-        Zmotor[i].param.kpVel = 1.8f;
-        Zmotor[i].param.kiVel = 0.2f;
+        Zmotor[i].param.kpPos = 1.0f;
+        Zmotor[i].param.kdPos = 0.01f;
+        Zmotor[i].param.kpVel = 2.0f;
+        Zmotor[i].param.kiVel = 0.4f;
         Zmotor[i].pvtparam.deltaT = 0.002f; // pvt默认点控间隔
         Zmotor[i].pvtparam.answer_mode = 2U; // 默认响应模式: 2:无反馈队列执行
         Zmotor[i].mode = Zdrive_Disable;    /* 初始 setmode 为 disable,上电即失能 */

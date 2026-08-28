@@ -10,6 +10,9 @@ SKY_MODE_FDCANID为Sky模式切换的fdCANid，DLC为2，data[0]取值范围为0
 
     */
 
+#define JOINTAK_REDUCTION_RATIO 6.0f
+
+
 #define SKY_ENABLE 0x01010401
 #define SKY_GRAB_FDCANID 0x01010402
 #define SKY_PUT_FDCANID 0x01010403
@@ -90,6 +93,14 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
     FDCAN_TxHeaderTypeDef tx_message;
     uint8_t tx_data[8];
 
+    tx_message.TxFrameType = FDCAN_DATA_FRAME;
+    tx_message.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    tx_message.BitRateSwitch = FDCAN_BRS_OFF;
+    tx_message.FDFormat = FDCAN_CLASSIC_CAN;
+    tx_message.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    tx_message.MessageMarker = 0;
+    tx_message.IdType = FDCAN_EXTENDED_ID;
+
     if (Rxheader.RxFrameType != FDCAN_DATA_FRAME || Rxheader.DataLength < 1 || Rxheader.IdType != FDCAN_EXTENDED_ID)
     {
         return;
@@ -98,13 +109,6 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
     if (Rxheader.Identifier == SKY_ENABLE && Rxheader.DataLength == 2 && Rx_Data[0] == 'M')
     {
         sky.enable = Rx_Data[1];
-        tx_message.TxFrameType = FDCAN_DATA_FRAME;
-        tx_message.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-        tx_message.BitRateSwitch = FDCAN_BRS_OFF;
-        tx_message.FDFormat = FDCAN_CLASSIC_CAN;
-        tx_message.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-        tx_message.MessageMarker = 0;
-        tx_message.IdType = FDCAN_EXTENDED_ID;
         tx_message.Identifier = 0x04010101;
         tx_message.DataLength = 2;
         tx_data[0] = 'M';
@@ -129,13 +133,6 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
     }
     if (Rxheader.Identifier == SKY_RESET_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'R' && Rx_Data[1] == 'S')
     {
-        tx_message.TxFrameType = FDCAN_DATA_FRAME;
-        tx_message.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-        tx_message.BitRateSwitch = FDCAN_BRS_OFF;
-        tx_message.FDFormat = FDCAN_CLASSIC_CAN;
-        tx_message.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-        tx_message.MessageMarker = 0;
-        tx_message.IdType = FDCAN_EXTENDED_ID;
         tx_message.Identifier = 0x040101FF;
         tx_message.DataLength = 2;
         tx_data[0] = 'R';
@@ -146,13 +143,6 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
     }
     if (Rxheader.Identifier == SKY_ALARM_FDCANID)
     {
-        tx_message.TxFrameType = FDCAN_DATA_FRAME;
-        tx_message.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
-        tx_message.BitRateSwitch = FDCAN_BRS_OFF;
-        tx_message.FDFormat = FDCAN_CLASSIC_CAN;
-        tx_message.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
-        tx_message.MessageMarker = 0;
-        tx_message.IdType = FDCAN_EXTENDED_ID;
         tx_message.Identifier = 0x040101EE;
         tx_message.DataLength = 0;
         HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &tx_message, tx_data);
@@ -174,7 +164,8 @@ void Sky_Init(void)
     /*AK-80初始化*/
     sky.JointAK->Begin = true;
     sky.JointAK->mode = Zdrive_Postion;
-
+    sky.JointAK->param.ReductionRatio=JOINTAK_REDUCTION_RATIO;
+    
     sky.FinishFlag = 1;
     Jaw_Init();
 }

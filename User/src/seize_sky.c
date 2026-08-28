@@ -30,7 +30,7 @@ SKY_MODE_FDCANID为Sky模式切换的fdCANid，DLC为2，data[0]取值范围为0
 #define JOINTGO_FINISH_THRESHOLD 0.5
 #define JOINTAK_FINISH_THRESHOLD 0.01
 
-#define GO_TIME 10000//单位为ms
+#define GO_TIME 5000//单位为ms
 
 Sky_t sky;
 
@@ -111,28 +111,51 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
         tx_data[1] = sky.enable;
         HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &tx_message, tx_data);
     }
-    if (Rxheader.Identifier == SKY_GRAB_FDCANID)
+    if (Rxheader.Identifier == SKY_GRAB_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'G' && Rx_Data[1] == 'S')
     {
         sky.Sky_Mode = Sky_Grab_Mode;
         sky.FinishFlag = 0;
     }
-    if (Rxheader.Identifier == SKY_PUT_FDCANID)
+    if (Rxheader.Identifier == SKY_PUT_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'P' && Rx_Data[1] == 'S')
     {
         sky.Sky_Mode = Sky_Put_Mode;
         sky.FinishFlag = 0;
     }
-    if (Rxheader.Identifier == SKY_ARM_RESET_FDCANID)
+    if (Rxheader.Identifier == SKY_ARM_RESET_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'A' && Rx_Data[1] == 'R')
     {
         sky.Sky_Mode = Sky_Carry_Mode;
         sky.FinishFlag = 0;
         /* code */
     }
-    if (Rxheader.Identifier == SKY_RESET_FDCANID)
+    if (Rxheader.Identifier == SKY_RESET_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'R' && Rx_Data[1] == 'S')
     {
-        sky.ResetFlag=true;
+        tx_message.TxFrameType = FDCAN_DATA_FRAME;
+        tx_message.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+        tx_message.BitRateSwitch = FDCAN_BRS_OFF;
+        tx_message.FDFormat = FDCAN_CLASSIC_CAN;
+        tx_message.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+        tx_message.MessageMarker = 0;
+        tx_message.IdType = FDCAN_EXTENDED_ID;
+        tx_message.Identifier = 0x040101FF;
+        tx_message.DataLength = 2;
+        tx_data[0] = 'R';
+        tx_data[1] = 'S';
+        HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &tx_message, tx_data);
+
+        sky.ResetFlag = true;
     }
     if (Rxheader.Identifier == SKY_ALARM_FDCANID)
     {
+        tx_message.TxFrameType = FDCAN_DATA_FRAME;
+        tx_message.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+        tx_message.BitRateSwitch = FDCAN_BRS_OFF;
+        tx_message.FDFormat = FDCAN_CLASSIC_CAN;
+        tx_message.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+        tx_message.MessageMarker = 0;
+        tx_message.IdType = FDCAN_EXTENDED_ID;
+        tx_message.Identifier = 0x040101EE;
+        tx_message.DataLength = 0;
+        HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &tx_message, tx_data);
     }
 }
 void Sky_Init(void)

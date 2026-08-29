@@ -10,8 +10,9 @@
 #define SKY_ALARM_FDCANID 0x010104EE
 #define SKY_RESET_FDCANID 0x010104FF
 #define JOINTAK_FINISH_THRESHOLD 0.005f
-#define GO_TIME 5000U
+#define GO_TIME 5000U /* 所有姿态默认运动时间，单位 ms */
 
+/* 每种姿态的目标位置；GO 单位为 rad，AK80 单位与其驱动接口定义一致。 */
 typedef struct
 {
     float go_position;
@@ -29,6 +30,7 @@ static const SkyPoseConfig_t sky_pose_config[] =
 
 Sky_t sky;
 
+/* 初始化轨迹控制器，不会使能电机或发送运动指令。 */
 void GoPos_Init(GoPosController_t *ctrl, UnitreeMotor *motor)
 {
     if (ctrl == NULL) return;
@@ -40,6 +42,7 @@ void GoPos_Init(GoPosController_t *ctrl, UnitreeMotor *motor)
     ctrl->state = GO_POS_IDLE;
 }
 
+/* 以当前反馈位置为起点，启动一条五次多项式缓速轨迹。 */
 bool GoPos_MoveTo(GoPosController_t *ctrl, float target_position, uint32_t duration_ms)
 {
     if (ctrl == NULL || ctrl->motor == NULL || duration_ms == 0U) return false;
@@ -51,6 +54,7 @@ bool GoPos_MoveTo(GoPosController_t *ctrl, float target_position, uint32_t durat
     return true;
 }
 
+/* 1 kHz 周期调用：更新目标位置，完成条件仅依据运行时间。 */
 void GoPos_Update(GoPosController_t *ctrl, uint32_t delta_ms)
 {
     float ratio;
@@ -72,6 +76,7 @@ bool GoPos_IsFinished(const GoPosController_t *ctrl)
 
 bool Sky_Enable(void)
 {
+    /* 使能只发起静默姿态动作，实际轨迹在 Sky_Func() 中执行。 */
 #if USE_UNITREE
     if (sky.JointGo == NULL) return false;
 #endif
@@ -126,6 +131,7 @@ void Sky_Func(void)
     }
     if (!sky.enable) return;
 
+    /* 模式请求由 CAN 回调登记，在定时器控制上下文中统一生效。 */
     if (sky.ModeChangePending)
     {
         Sky_Mode_t mode = sky.RequestedMode;
@@ -134,6 +140,7 @@ void Sky_Func(void)
         {
             sky.Sky_Mode = mode;
             sky.FinishFlag = false;
+/* 可通过 motor_config.h 单独编译调试 GO 或 AK80。 */
 #if USE_UNITREE
             GoPos_MoveTo(&sky.GoController, sky_pose_config[mode].go_position,
                          sky_pose_config[mode].duration_ms);
@@ -175,6 +182,7 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
     tx_message.IdType = FDCAN_EXTENDED_ID;
     if (Rxheader.RxFrameType != FDCAN_DATA_FRAME || Rxheader.DataLength < 1 || Rxheader.IdType != FDCAN_EXTENDED_ID) return;
 
+    /* CAN 回调只登记模式请求，不直接操作轨迹控制器。 */
     if (Rxheader.Identifier == SKY_ENABLE && Rxheader.DataLength == 2 && Rx_Data[0] == 'M')
     {
         if (Rx_Data[1]) Sky_Enable(); else Sky_Disable();
@@ -201,6 +209,7 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
 
 void Sky_Init(void)
 {
+    /* 初始化阶段两个电机均失能；GO 保留 set_zero，交由底层完成零点设置。 */
     sky.enable = false;
     sky.ResetFlag = false;
 #if USE_UNITREE

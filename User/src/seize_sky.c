@@ -21,10 +21,10 @@ typedef struct
 
 static const SkyPoseConfig_t sky_pose_config[] =
 {
-    [Sky_Grab_Mode] = {0.5f, 1.0f, GO_TIME},
-    [Sky_Put_Mode] = {0.0f, 1.0f, GO_TIME},
-    [Sky_Carry_Mode] = {-1.0f, 0.3f, GO_TIME},
-    [Sky_Silent_Mode] = {0.5f, 0.4243f, GO_TIME}
+    [Sky_Grab_Mode] = {-0.359f, 0.79f, GO_TIME},
+    [Sky_Put_Mode] = {0.770f, 2.348f, GO_TIME},
+    [Sky_Carry_Mode] = {1.080f, 0.41f, GO_TIME},
+    [Sky_Silent_Mode] = {1.730f, 0.4243f, GO_TIME}
 };
 
 Sky_t sky;

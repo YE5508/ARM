@@ -109,7 +109,7 @@ void MX_UART7_Init(void)
   huart7.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   huart7.Init.ClockPrescaler = UART_PRESCALER_DIV1;
   huart7.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_RS485Ex_Init(&huart7, UART_DE_POLARITY_HIGH, 0, 0) != HAL_OK)
+  if (HAL_UART_Init(&huart7) != HAL_OK)
   {
     Error_Handler();
   }
@@ -447,20 +447,11 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     /* UART7 clock enable */
     __HAL_RCC_UART7_CLK_ENABLE();
 
-    __HAL_RCC_GPIOF_CLK_ENABLE();
     __HAL_RCC_GPIOE_CLK_ENABLE();
     /**UART7 GPIO Configuration
-    PF8     ------> UART7_DE
     PE7     ------> UART7_RX
     PE8     ------> UART7_TX
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_8;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF7_UART7;
-    HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
-
     GPIO_InitStruct.Pin = GPIO_PIN_7|GPIO_PIN_8;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -479,8 +470,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     hdma_uart7_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
     hdma_uart7_rx.Init.Mode = DMA_CIRCULAR;
     hdma_uart7_rx.Init.Priority = DMA_PRIORITY_VERY_HIGH;
-    hdma_uart7_rx.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
-    hdma_uart7_rx.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+    hdma_uart7_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     hdma_uart7_rx.Init.MemBurst = DMA_MBURST_SINGLE;
     hdma_uart7_rx.Init.PeriphBurst = DMA_PBURST_SINGLE;
     if (HAL_DMA_Init(&hdma_uart7_rx) != HAL_OK)
@@ -889,12 +879,9 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     __HAL_RCC_UART7_CLK_DISABLE();
 
     /**UART7 GPIO Configuration
-    PF8     ------> UART7_DE
     PE7     ------> UART7_RX
     PE8     ------> UART7_TX
     */
-    HAL_GPIO_DeInit(GPIOF, GPIO_PIN_8);
-
     HAL_GPIO_DeInit(GPIOE, GPIO_PIN_7|GPIO_PIN_8);
 
     /* UART7 DMA DeInit */

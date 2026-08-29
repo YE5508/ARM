@@ -188,9 +188,6 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     else if (huart->Instance == UART4)
     {
         SCB_InvalidateDCache_by_Addr((uint32_t *)UART4_RxBuffer, Size);
-#if USE_UNITREE && (MOTOR_UNITREE_UART == 4)
-        UnitreeMotor_UART_RxHandler(UART4_RxBuffer, Size);
-#endif
         /* 在这里加 UART4 的协议处理 */
         HAL_UART_DMAStop(&huart4);
         HAL_UARTEx_ReceiveToIdle_DMA(&huart4, UART4_RxBuffer, UART_RX_BUFFER_SIZE);
@@ -204,21 +201,13 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     }
     else if (huart->Instance == UART7)
     {
-        SCB_InvalidateDCache_by_Addr((uint32_t *)Unitree_UART7_RxBuffer, Size);
 #if USE_UNITREE && (MOTOR_UNITREE_UART == 7)
         UnitreeMotor_UART_RxHandler(Unitree_UART7_RxBuffer, Size);
 #endif
-        /* 在这里加 UART7 的协议处理 */
-        // 环形dma
-        // HAL_UART_DMAStop(&huart7);
-        // HAL_UARTEx_ReceiveToIdle_DMA(&huart7, Unitree_UART7_RxBuffer, UART_RX_BUFFER_SIZE);
     }
     else if (huart->Instance == UART9)
     {
         SCB_InvalidateDCache_by_Addr((uint32_t *)UART9_RxBuffer, Size);
-#if USE_UNITREE && (MOTOR_UNITREE_UART == 9)
-        UnitreeMotor_UART_RxHandler(UART9_RxBuffer, Size);
-#endif
         /* 在这里加 UART9 的协议处理 */
         HAL_UART_DMAStop(&huart9);
         HAL_UARTEx_ReceiveToIdle_DMA(&huart9, UART9_RxBuffer, UART_RX_BUFFER_SIZE);
@@ -245,8 +234,6 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
         HAL_UARTEx_ReceiveToIdle_DMA(&huart4, UART4_RxBuffer, UART_RX_BUFFER_SIZE);
     else if (huart->Instance == USART6)
         HAL_UARTEx_ReceiveToIdle_DMA(&huart6, UART6_RxBuffer, UART_RX_BUFFER_SIZE);
-    else if (huart->Instance == UART7)
-        HAL_UARTEx_ReceiveToIdle_DMA(&huart7, Unitree_UART7_RxBuffer, UNITREE_RX_BUFFER_SIZE);
     else if (huart->Instance == UART9)
         HAL_UARTEx_ReceiveToIdle_DMA(&huart9, UART9_RxBuffer, UART_RX_BUFFER_SIZE);
 }
@@ -255,7 +242,9 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart->Instance == UART7)
     {
+#if USE_UNITREE && (MOTOR_UNITREE_UART == 7)
         UnitreeMotor_UART_TxCpltCallback(huart);
+#endif
     }
     if (huart->Instance == BOARD_BLUETOOTH_UART.Instance)
     {

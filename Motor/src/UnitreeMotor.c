@@ -10,6 +10,7 @@
 #include "UnitreeMotor.h"
 #include "usart.h"
 #include "crc_ccitt.h"
+#include "ring_buffer.h"
 
 #if USE_UNITREE
 
@@ -24,6 +25,12 @@
 
 UnitreeMotor Unitree_motors[UNITREE_MOTOR_NUM];
 __RAM_D1_ ALIGN_32B uint8_t Unitree_UART7_RxBuffer[UNITREE_RX_BUFFER_SIZE] = {0};
+static __RAM_D1_ ALIGN_32B uint8_t s_unitree_uart7_rx_buf2[UNITREE_RX_BUFFER_SIZE] = {0};
+static RingBuffer_t s_unitree_rx_queue;
+static uint8_t s_unitree_rx_queue_buf[UNITREE_RX_BUFFER_SIZE];
+static uint8_t s_unitree_frame[UNITREE_FRAME_LENGTH];
+static uint8_t s_unitree_frame_len = 0U;
+static bool s_unitree_frame_started = false;
 
 static bool s_unitree_initialized = false;
 static uint8_t s_unitree_tx_index = 0U;
@@ -80,6 +87,27 @@ static inline void Unitree_SetTxMode(void)
 }
 
 /*
+ * @brief  启动 UART DMA 双缓冲空闲接收，参照 R1_Arm zip 的双缓冲写法。
+ */
+static void UnitreeMotor_UART_DoubleBufferStart(UART_HandleTypeDef *uart)
+{
+    if (uart == NULL || uart->hdmarx == NULL)
+    {
+        return;
+    }
+
+    uart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
+    uart->RxEventType = HAL_UART_RXEVENT_IDLE;
+    uart->RxXferSize = UNITREE_RX_BUFFER_SIZE;
+    SET_BIT(uart->Instance->CR3, USART_CR3_DMAR);
+    __HAL_UART_ENABLE_IT(uart, UART_IT_IDLE);
+    HAL_DMAEx_MultiBufferStart(uart->hdmarx, (uint32_t)&uart->Instance->RDR,
+                               (uint32_t)Unitree_UART7_RxBuffer,
+                               (uint32_t)s_unitree_uart7_rx_buf2,
+                               UNITREE_RX_BUFFER_SIZE);
+}
+
+/*
  * @brief  初始化宇树电机驱动相关全局状态和各电机对象。
  * @details
  *  1. 清零所有电机结构体；
@@ -111,7 +139,10 @@ void UnitreeMotor_Init(void)
     s_unitree_tx_index = 0U;
     s_unitree_initialized = true;
     
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart7, Unitree_UART7_RxBuffer, UNITREE_RX_BUFFER_SIZE);
+    RingBuffer_Init(&s_unitree_rx_queue, s_unitree_rx_queue_buf, sizeof(s_unitree_rx_queue_buf));
+    s_unitree_frame_len = 0U;
+    s_unitree_frame_started = false;
+    UnitreeMotor_UART_DoubleBufferStart(UnitreeMotor_GetUart());
     Unitree_SetRxMode();
 }
 
@@ -245,46 +276,116 @@ void UnitreeMotor_DecodeFrame(UnitreeMotorData_t *data)
 }
 
 /*
- * @brief  UART DMA 接收回调入口，处理完整的一帧电机反馈数据。
- * @param  data  接收到的数据缓存。
- * @param  size  本次接收长度。
- * @details
- *  仅处理固定长度的反馈帧；成功解析后，将数据写回对应电机对象，
- *  并扣除当前零点偏移，保证上层读取的是相对零点后的角度。
+ * @brief  从环形队列中取出完整 16 字节反馈帧并解析。
  */
-void UnitreeMotor_UART_RxHandler(const uint8_t *data, uint16_t size)
+static void UnitreeMotor_ParseRxQueue(void)
 {
-    UnitreeMotorData_t *rx_data = &s_unitree_rx_data;
+    uint8_t byte;
 
-    if (data == NULL || size != sizeof(UnitreeMotorFeedbackFrame_t))
+    while (RingBuffer_Pop(&s_unitree_rx_queue, &byte))
     {
-        return;
-    }
+        if (!s_unitree_frame_started)
+        {
+            if (byte == 0xFD)
+            {
+                s_unitree_frame[0] = 0xFD;
+                s_unitree_frame_len = 1U;
+                s_unitree_frame_started = true;
+            }
+            continue;
+        }
 
-    memset(rx_data, 0, sizeof(*rx_data));
-    memcpy(&rx_data->frame, data, size);
-    UnitreeMotor_DecodeFrame(rx_data);
+        if (s_unitree_frame_len == 1U)
+        {
+            if (byte == 0xEE)
+            {
+                s_unitree_frame[1] = 0xEE;
+                s_unitree_frame_len = 2U;
+            }
+            else if (byte == 0xFD)
+            {
+                s_unitree_frame[0] = 0xFD;
+                s_unitree_frame_len = 1U;
+            }
+            else
+            {
+                s_unitree_frame_started = false;
+                s_unitree_frame_len = 0U;
+            }
+            continue;
+        }
 
-    if (rx_data->correct != 1 || rx_data->id >= UNITREE_MOTOR_NUM)
-    {
-        return;
-    }
+        s_unitree_frame[s_unitree_frame_len++] = byte;
+        if (s_unitree_frame_len >= UNITREE_FRAME_LENGTH)
+        {
+            UnitreeMotorData_t *rx_data = &s_unitree_rx_data;
 
-    {
-        uint32_t bad_msg = Unitree_motors[rx_data->id].data.bad_msg;
-        Unitree_motors[rx_data->id].data = *rx_data;
-        Unitree_motors[rx_data->id].data.bad_msg = bad_msg;
-        Unitree_motors[rx_data->id].data.position -=
-            Unitree_motors[rx_data->id].zero_offset;
+            memset(rx_data, 0, sizeof(*rx_data));
+            memcpy(&rx_data->frame, s_unitree_frame, sizeof(rx_data->frame));
+            UnitreeMotor_DecodeFrame(rx_data);
+
+            if (rx_data->correct == 1 && rx_data->id < UNITREE_MOTOR_NUM)
+            {
+                uint32_t bad_msg = Unitree_motors[rx_data->id].data.bad_msg;
+                Unitree_motors[rx_data->id].data = *rx_data;
+                Unitree_motors[rx_data->id].data.bad_msg = bad_msg;
+                Unitree_motors[rx_data->id].data.position -=
+                    Unitree_motors[rx_data->id].zero_offset;
+            }
+
+            s_unitree_frame_started = false;
+            s_unitree_frame_len = 0U;
+        }
     }
 }
 
 /*
- * @brief  UART 发送完成回调。
- * @param  huart 当前完成发送的串口。
- * @details
- *  发送完控制命令后切回接收模式，准备接收下一帧电机回包。
+ * @brief  UART 双缓冲空闲中断入口。
+ * @param  data  保留参数，实际数据从双缓冲中读取。
+ * @param  size  本次空闲前接收到的字节数。
  */
+void UnitreeMotor_UART_RxHandler(const uint8_t *data, uint16_t size)
+{
+    UART_HandleTypeDef *uart = UnitreeMotor_GetUart();
+    uint8_t *src;
+    uint32_t i;
+
+    (void)data;
+    if (uart == NULL || uart->hdmarx == NULL)
+    {
+        return;
+    }
+
+    if (((((DMA_Stream_TypeDef *)uart->hdmarx->Instance)->CR) & DMA_SxCR_CT) == RESET)
+    {
+        __HAL_DMA_DISABLE(uart->hdmarx);
+        ((DMA_Stream_TypeDef *)uart->hdmarx->Instance)->CR |= DMA_SxCR_CT;
+        __HAL_DMA_SET_COUNTER(uart->hdmarx, UNITREE_RX_BUFFER_SIZE);
+        src = Unitree_UART7_RxBuffer;
+    }
+    else
+    {
+        __HAL_DMA_DISABLE(uart->hdmarx);
+        ((DMA_Stream_TypeDef *)uart->hdmarx->Instance)->CR &= ~(DMA_SxCR_CT);
+        __HAL_DMA_SET_COUNTER(uart->hdmarx, UNITREE_RX_BUFFER_SIZE);
+        src = s_unitree_uart7_rx_buf2;
+    }
+
+    if (size > UNITREE_RX_BUFFER_SIZE)
+    {
+        size = UNITREE_RX_BUFFER_SIZE;
+    }
+
+    SCB_InvalidateDCache_by_Addr((uint32_t *)src, size);
+    for (i = 0U; i < size; i++)
+    {
+        RingBuffer_Push(&s_unitree_rx_queue, src[i]);
+    }
+
+    __HAL_DMA_ENABLE(uart->hdmarx);
+    UnitreeMotor_ParseRxQueue();
+}
+
 void UnitreeMotor_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
     if(huart == NULL || huart != UnitreeMotor_GetUart())

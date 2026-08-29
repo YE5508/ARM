@@ -41,6 +41,34 @@ Sky_t sky;
 void Sky_Func(void)
 {
     static float time;
+    float go_target_position;
+    if (sky.buzzer_phase != 0)
+    {
+        if (--sky.buzzer_timer == 0)
+        {
+            switch (sky.buzzer_phase)
+            {
+            case 1:
+                BspBuzzer_Off();
+                sky.buzzer_phase = 2;
+                sky.buzzer_timer = 100;
+                break;
+            case 2:
+                BspBuzzer_On();
+                sky.buzzer_phase = 3;
+                sky.buzzer_timer = 100;
+                break;
+            case 3:
+                BspBuzzer_Off();
+                sky.buzzer_phase = 4;
+                sky.buzzer_timer = 100;
+                break;
+            case 4:
+                sky.buzzer_phase = 0;
+                break;
+            }
+        }
+    }
     if(sky.ResetFlag==true)
     {
         __set_FAULTMASK(1); // 关闭所有的中断，确保执行复位时不被中断打断
@@ -54,6 +82,7 @@ void Sky_Func(void)
     {
 
     case Sky_Grab_Mode:
+        go_target_position = JOINTGO_GRAB_POSITION;
         if(sky.FinishFlag == 0 )
         {
             time=Quintic_Traj(sky.Go_time++,GO_TIME);//轨迹规划，防止GO电机瞬间输出力矩过大
@@ -71,6 +100,7 @@ void Sky_Func(void)
         break;
 
     case Sky_Put_Mode:
+        go_target_position = JOINTGO_PUT_POSITION;
         if(sky.FinishFlag == 0 )
         {
             time=Quintic_Traj(sky.Go_time++,GO_TIME);
@@ -87,13 +117,19 @@ void Sky_Func(void)
         break;
 
     case Sky_Carry_Mode:
+        go_target_position = JOINTGO_CARRY_POSITION;
         if(sky.FinishFlag == 0 )
         {
             time=Quintic_Traj(sky.Go_time++,GO_TIME);
             sky.JointGo->cmd.position = (JOINTGO_CARRY_POSITION-sky.JointGo_lastposition)*time;
             sky.JointAK->valSetNow.pos_deg = JOINTAK_CARRY_POSITION;
-                if (fabs(sky.JointGo->data.position - JOINTGO_CARRY_POSITION) < JOINTGO_FINISH_THRESHOLD &&
-        fabs(sky.JointAK->valSetNow.pos_deg - sky.JointAK->valReal.pos_deg) < JOINTAK_FINISH_THRESHOLD&&sky.Go_time>=GO_TIME&&sky.JointAK->valReal.speed_rpm<=0.001&&sky.JointGo->data.speed<=0.001)
+        }
+        break;
+    default:
+        return;
+    }
+    if (fabs(sky.JointGo->data.position - go_target_position) < JOINTGO_FINISH_THRESHOLD &&
+        fabs(sky.JointAK->valSetNow.pos_deg - sky.JointAK->valReal.pos_deg) < JOINTAK_FINISH_THRESHOLD)
     {
         sky.FinishFlag = 1;
         sky.Go_time=0;

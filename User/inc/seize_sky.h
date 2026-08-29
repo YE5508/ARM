@@ -24,6 +24,7 @@ typedef struct
     bool FinishFlag;
     uint32_t Go_time;
     bool ResetFlag;
+    float JointGo_lastposition;
     /* data */
 }Sky_t;
 

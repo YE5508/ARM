@@ -11,4 +11,7 @@
 1. 位置范围 -2--+0.7
 
 
+## debug须知
+1. 使能顺序：
+   sky->go->sky.ModeChangePending
 

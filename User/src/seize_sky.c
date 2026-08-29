@@ -25,7 +25,7 @@ static const SkyPoseConfig_t sky_pose_config[] =
     [Sky_Grab_Mode] = {-0.359f, 0.79f, GO_TIME},
     [Sky_Put_Mode] = {0.770f, 2.348f, GO_TIME},
     [Sky_Carry_Mode] = {1.080f, 0.41f, GO_TIME},
-    [Sky_Silent_Mode] = {1.730f, 0.4243f, GO_TIME}
+    [Sky_Silent_Mode] = {1.4f, 0.4243f, GO_TIME}
 };
 
 Sky_t sky;
@@ -185,7 +185,7 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
     /* CAN 回调只登记模式请求，不直接操作轨迹控制器。 */
     if (Rxheader.Identifier == SKY_ENABLE && Rxheader.DataLength == 2 && Rx_Data[0] == 'M')
     {
-        if (Rx_Data[1]) Sky_Enable(); else Sky_Disable();
+        if (Rx_Data[1]) Sky_Enable(); else if(Rx_Data[1]==0) Sky_Disable();
         tx_message.Identifier = 0x04010101; tx_message.DataLength = 2;
         tx_data[0] = 'M'; tx_data[1] = sky.enable;
         HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &tx_message, tx_data);
@@ -229,8 +229,8 @@ void Sky_Init(void)
     sky.JointGo->begin = true;
     sky.JointGo->enable = false;
     sky.JointGo->set_zero = true;
-    sky.JointGo->cmd.kp = 0.4f;
-    sky.JointGo->cmd.kd = 0.04f;
+    sky.JointGo->cmd.kp = 0.65f;
+    sky.JointGo->cmd.kd = 0.02f;
 #endif
 #if USE_ZMDR
     sky.JointAK->Begin = false;

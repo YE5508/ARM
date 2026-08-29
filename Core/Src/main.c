@@ -111,7 +111,9 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+	#if USE_ZMDR
   ZdriveInit();
+	#endif
   /* USER CODE END Init */
 
   /* Configure the system clock */

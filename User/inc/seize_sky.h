@@ -46,6 +46,7 @@ typedef struct
     volatile bool FinishFlag;                /* 当前动作完成标志 */
     volatile bool ResetFlag;                 /* 请求系统复位 */
     GoPosController_t GoController;          /* GO 缓速位控控制器 */
+    volatile bool initialized;               /*初始化完成标志*/
 } Sky_t;
 
 extern Sky_t sky;

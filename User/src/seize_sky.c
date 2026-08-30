@@ -10,7 +10,7 @@
 #define SKY_ALARM_FDCANID 0x010104EE
 #define SKY_RESET_FDCANID 0x010104FF
 #define JOINTAK_FINISH_THRESHOLD 0.005f
-#define GO_TIME 5000U /* 所有姿态默认运动时间，单位 ms */
+#define GO_TIME 4000U /* 所有姿态默认运动时间，单位 ms */
 
 /* 每种姿态的目标位置；GO 单位为 rad，AK80 单位与其驱动接口定义一致。 */
 typedef struct
@@ -22,13 +22,13 @@ typedef struct
 
 static const SkyPoseConfig_t sky_pose_config[] =
 {
-    [Sky_Grab_Mode] = {-0.359f, 0.79f, GO_TIME},
-    [Sky_Put_Mode] = {0.770f, 2.348f, GO_TIME},
-    [Sky_Carry_Mode] = {1.080f, 0.41f, GO_TIME},
-    [Sky_Silent_Mode] = {1.4f, 0.4243f, GO_TIME}
+    [Sky_Grab_Mode] = {-1.3f, 330.0f, GO_TIME},
+    [Sky_Put_Mode] = {-0.7f, 900.0f, GO_TIME},
+    [Sky_Carry_Mode] = {-0.64f, 330.0f, GO_TIME},
+    [Sky_Silent_Mode] = {-0.64f, 100.0f, GO_TIME}//GO电机以机械限位为0
 };
 
-Sky_t sky;
+Sky_t sky={0};
 
 /* 初始化轨迹控制器，不会使能电机或发送运动指令。 */
 void GoPos_Init(GoPosController_t *ctrl, UnitreeMotor *motor)
@@ -232,11 +232,7 @@ void Sky_Init(void)
     sky.JointGo->cmd.kp = 0.65f;
     sky.JointGo->cmd.kd = 0.02f;
 #endif
-#if USE_ZMDR
-    sky.JointAK->Begin = false;
-    sky.JointAK->mode = Zdrive_Disable;
-    sky.JointAK->param.ReductionRatio = JOINTAK_REDUCTION_RATIO;
-#endif
+
     sky.FinishFlag = true;
 #if USE_UNITREE
     GoPos_Init(&sky.GoController, sky.JointGo);
@@ -244,4 +240,18 @@ void Sky_Init(void)
     GoPos_Init(&sky.GoController, NULL);
 #endif
     Jaw_Init();
+#if USE_ZMDR
+    sky.JointAK->Begin = false;
+    sky.JointAK->mode = Zdrive_Disable;
+    sky.JointAK->param.ReductionRatio = JOINTAK_REDUCTION_RATIO;
+        if(sky.JointAK->valReal.pos_deg!=0)
+    {
+        ZdriveSet(0,0x0,Pur);
+        sky.initialized=1;
+    }
+#endif
+    if(!USE_ZMDR)
+    {
+        sky.initialized=1;
+    }
 }

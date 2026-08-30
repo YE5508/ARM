@@ -45,6 +45,10 @@ void TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
            CAN1 留给用户通信,通用出队;ZDrive 所在总线由 ZdriveDequeue
            出队(命名归驱动所有)。拆分关闭时 CAN3 出队是空操作(队列可能
            承载 DJI/其他);ZDrive 若配在 CAN1,需注意此处会双重出队。 */
+        if(!sky.initialized)
+        {
+            Sky_Init();
+        }
         CAN_DequeueTx(&CAN1_Txqueue);
 #if USE_ZMDR
         ZdriveDequeue((uint8_t)MOTOR_ZDRIVE_CAN_BUS_1);

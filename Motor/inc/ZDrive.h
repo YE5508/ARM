@@ -148,6 +148,7 @@ extern "C"
         ZdriveValue valPre;
         ZdriveParam param;
         ZdriveLimit limit;
+        float zero_position;
     } Zdrive;
 
 #if USE_ZMDR

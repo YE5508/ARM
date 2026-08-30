@@ -126,6 +126,7 @@ void ZdriveInit(void)
     ZdriveAsk(0xFU, Pos_PID_D);
     ZdriveAsk(0xFU, Vel_PID_P);
     ZdriveAsk(0xFU, Vel_PID_I);
+    ZdriveSet(0,0xf,Pur);
 }
 
 /* 统一 set:按 set_code 完成单位换算、帧编码、读回确认后再入队。

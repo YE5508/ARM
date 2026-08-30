@@ -131,7 +131,7 @@ void UnitreeMotor_Init(void)
         Unitree_motors[i].cmd.id = (uint16_t)i;
         Unitree_motors[i].data.id = (uint8_t)i;
         Unitree_motors[i].enable = false;
-        Unitree_motors[i].set_zero = false;//怀疑是每次启动GO转动距离不同的原因
+        Unitree_motors[i].set_zero = true;//怀疑是每次启动GO转动距离不同的原因
         Unitree_motors[i].zero_offset = 0.0f;
         Unitree_motors[i].begin = true;
     }
@@ -518,7 +518,7 @@ void UnitreeMotor_Func(void)
             motor->cmd.mode = UNITREE_MOTOR_MODE_IDLE;
         }
 
-        if (motor->set_zero)
+        if (motor->set_zero&&motor->data.correct==1)
         {
             UnitreeMotor_SetZero((int)i);
             motor->set_zero = false;

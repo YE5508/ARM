@@ -162,7 +162,7 @@ int main(void)
 #if USE_UNITREE
   UnitreeMotor_Init();
 #endif
-  Sky_Init();
+
   /* 蓝牙模块:建队列、建收发任务(必须在启动串口 DMA 接收之前) */
   Bluetooth_Init();
 

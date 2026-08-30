@@ -1,5 +1,5 @@
 # Keil MDK-ARM 编译产物(每次编译都会重新生成,无需提交)
-MDK-ARM/27RC_Proj_Template/
+MDK-ARM/ARM/
 MDK-ARM/RTE/
 MDK-ARM/DebugConfig/
 

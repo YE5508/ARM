@@ -1274,18 +1274,17 @@ ARM Macro Assembler    Page 20
               00000200 
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M7.fp.dp --depen
-d=27rc_proj_template\startup_stm32h723xx.d -o27rc_proj_template\startup_stm32h7
-23xx.o -I../Core/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc -I../Drivers/STM32H7
-xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/include -
-I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I../Middlewares/Thir
-d_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F -I../Drivers/CMSIS/RTOS2/Include
- -I../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I../Drivers/CMSIS/Include -I..
-/Middlewares/ST/ARM/DSP/Inc -I../Motor/inc -I../Application/inc -I../BSP/inc -I
-../Algorithm/inc -I../Config -I../Communication/Bluetooth -I../Communication/VO
-FA -I.\RTE\_27RC_Proj_Template -IE:\keil5\ARM\CMSIS\5.9.0\CMSIS\Core\Include --
-predefine="__UVISION_VERSION SETA 537" --predefine="_RTE_ SETA 1" --predefine="
-STM32H723xx SETA 1" --predefine="_RTE_ SETA 1" --list=startup_stm32h723xx.lst s
-tartup_stm32h723xx.s
+d=.\arm\startup_stm32h723xx.d -o.\arm\startup_stm32h723xx.o -I../Core/Inc -I../
+Drivers/STM32H7xx_HAL_Driver/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -
+I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Part
+y/FreeRTOS/Source/CMSIS_RTOS_V2 -I../Middlewares/Third_Party/FreeRTOS/Source/po
+rtable/RVDS/ARM_CM4F -I../Drivers/CMSIS/RTOS2/Include -I../Drivers/CMSIS/Device
+/ST/STM32H7xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/ST/ARM/DSP/In
+c -I../Motor/inc -I../Application/inc -I../BSP/inc -I../Algorithm/inc -I../Conf
+ig -I../Communication/Bluetooth -I../Communication/VOFA -I.\RTE\_27RC_Proj_Temp
+late -IE:\keil5\ARM\CMSIS\5.9.0\CMSIS\Core\Include --predefine="__UVISION_VERSI
+ON SETA 537" --predefine="_RTE_ SETA 1" --predefine="STM32H723xx SETA 1" --pred
+efine="_RTE_ SETA 1" --list=startup_stm32h723xx.lst startup_stm32h723xx.s
 
 
 

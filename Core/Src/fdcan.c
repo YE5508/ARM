@@ -72,7 +72,17 @@ void MX_FDCAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN1_Init 2 */
+  FDCAN_FilterTypeDef sFilterConfig;
 
+	sFilterConfig.IdType = FDCAN_EXTENDED_ID;
+	sFilterConfig.FilterIndex = 0;  
+	sFilterConfig.FilterType = FDCAN_FILTER_RANGE;  
+	sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;  
+	sFilterConfig.FilterID1 = 0x01010401;  
+	sFilterConfig.FilterID2 = 0x010104FF; 
+	
+	if (HAL_FDCAN_ConfigFilter(&hfdcan1, &sFilterConfig) != HAL_OK)
+			Error_Handler();
 
   /* USER CODE END FDCAN1_Init 2 */
 

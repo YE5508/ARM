@@ -14,7 +14,8 @@ typedef enum
     Sky_Grab_Mode = 0,
     Sky_Put_Mode,
     Sky_Carry_Mode,
-    Sky_Silent_Mode
+    Sky_Silent_Mode,
+    Sky_Ball_Mode
 } Sky_Mode_t;
 
 typedef enum

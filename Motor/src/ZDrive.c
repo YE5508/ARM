@@ -386,7 +386,7 @@ static void Zdrive_SwitchMachine(Zdrive *motor, uint8_t id)
         motor->valSetPre.speed_rpm = 0.f;
         break;
     case Zdrive_Postion:
-        motor->valSetNow.pos_deg = motor->valReal.pos_deg;
+        //motor->valSetNow.pos_deg = motor->valReal.pos_deg;
         motor->valSetPre.pos_deg = motor->valReal.pos_deg;
         break;
     case Zdrive_SaveSetting:

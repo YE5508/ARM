@@ -7,10 +7,11 @@
 #define SKY_GRAB_FDCANID 0x01010402
 #define SKY_PUT_FDCANID 0x01010403
 #define SKY_ARM_RESET_FDCANID 0x01010404
+#define SKY_BALL_FDCANID 0x01010406
 #define SKY_ALARM_FDCANID 0x010104EE
 #define SKY_RESET_FDCANID 0x010104FF
 #define JOINTAK_FINISH_THRESHOLD 0.005f
-#define GO_TIME 4000U /* 所有姿态默认运动时间，单位 ms */
+#define GO_TIME 3000U /* 所有姿态默认运动时间，单位 ms */
 
 /* 每种姿态的目标位置；GO 单位为 rad，AK80 单位与其驱动接口定义一致。 */
 typedef struct
@@ -22,10 +23,11 @@ typedef struct
 
 static const SkyPoseConfig_t sky_pose_config[] =
 {
-    [Sky_Grab_Mode] = {-1.881f, 310.0f, GO_TIME},
-    [Sky_Put_Mode] = {-1.15f, 900.0f, GO_TIME},
-    [Sky_Carry_Mode] = {-0.64f, 212.39f, GO_TIME},
-    [Sky_Silent_Mode] = {-0.64f, 100.0f, GO_TIME}//GO电机以机械限位为0
+    [Sky_Grab_Mode] = {-1.84f, 260.0f, GO_TIME},//0.025       -1.8
+    [Sky_Put_Mode] = {-1.2f, 870.0f, GO_TIME},
+    [Sky_Carry_Mode] = {-1.155f, 260.0f, GO_TIME},//212.39
+    [Sky_Silent_Mode] = {-0.615f, 98.8f, GO_TIME},//GO电机以机械限位为0
+    [Sky_Ball_Mode] = {-1.57f, 260.0f, GO_TIME}
 };
 
 Sky_t sky={0};
@@ -136,7 +138,7 @@ void Sky_Func(void)
     {
         Sky_Mode_t mode = sky.RequestedMode;
         sky.ModeChangePending = false;
-        if (mode <= Sky_Silent_Mode)
+        if (mode <= Sky_Ball_Mode)
         {
             sky.Sky_Mode = mode;
             sky.FinishFlag = false;
@@ -183,21 +185,29 @@ void Sky_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_Data)
     if (Rxheader.RxFrameType != FDCAN_DATA_FRAME || Rxheader.DataLength < 1 || Rxheader.IdType != FDCAN_EXTENDED_ID) return;
 
     /* CAN 回调只登记模式请求，不直接操作轨迹控制器。 */
-    if (Rxheader.Identifier == SKY_ENABLE && Rxheader.DataLength == 2 && Rx_Data[0] == 'M')
+    if (Rxheader.Identifier == SKY_ENABLE && Rxheader.DataLength == 2 && Rx_Data[0] == 'M')//ASCII 4D
     {
         if (Rx_Data[1]) Sky_Enable(); else if(Rx_Data[1]==0) Sky_Disable();
         tx_message.Identifier = 0x04010101; tx_message.DataLength = 2;
         tx_data[0] = 'M'; tx_data[1] = sky.enable;
         HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &tx_message, tx_data);
     }
-    if (Rxheader.Identifier == SKY_GRAB_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'G' && Rx_Data[1] == 'S')
+    if (Rxheader.Identifier == SKY_GRAB_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'G' && Rx_Data[1] == 'S')//ASCII 47,53
     { sky.RequestedMode = Sky_Grab_Mode; sky.ModeChangePending = true; }
-    if (Rxheader.Identifier == SKY_PUT_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'P' && Rx_Data[1] == 'S')
+    if (Rxheader.Identifier == SKY_PUT_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'P' && Rx_Data[1] == 'S')//ASCII 50,53
     { sky.RequestedMode = Sky_Put_Mode; sky.ModeChangePending = true; }
-    if (Rxheader.Identifier == SKY_ARM_RESET_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'A' && Rx_Data[1] == 'R')
+    if (Rxheader.Identifier == SKY_ARM_RESET_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'A' && Rx_Data[1] == 'R')//ASCII 41,52
     { sky.RequestedMode = Sky_Carry_Mode; sky.ModeChangePending = true; }
-    if (Rxheader.Identifier == SKY_RESET_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'R' && Rx_Data[1] == 'S')
-    {
+    if (Rxheader.Identifier ==SKY_BALL_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'G' && Rx_Data[1] == 'B')//ASCII 47,42
+    { sky.RequestedMode = Sky_Ball_Mode; sky.ModeChangePending = true; }
+    if (Rxheader.Identifier == SKY_RESET_FDCANID && Rxheader.DataLength == 2 && Rx_Data[0] == 'R' && Rx_Data[1] == 'S')//ASCII 52,53
+    {/*#define SKY_ENABLE 0x01010401
+#define SKY_GRAB_FDCANID 0x01010402
+#define SKY_PUT_FDCANID 0x01010403
+#define SKY_ARM_RESET_FDCANID 0x01010404
+#define SKY_BALL_FDCANID 0x01010406
+#define SKY_ALARM_FDCANID 0x010104EE
+#define SKY_RESET_FDCANID 0x010104FF*/
         tx_message.Identifier = 0x040101FF; tx_message.DataLength = 2;
         tx_data[0] = 'R'; tx_data[1] = 'S';
         HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &tx_message, tx_data);
